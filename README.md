@@ -14,6 +14,7 @@ A simple Bash script to quickly switch your system DNS servers to popular provid
   * Radar
   * Electro
   * DNS Pro
+  * DynX
   * 403
   * Begzar
   * Google
@@ -43,6 +44,7 @@ This script includes a curated list of reliable DNS servers used widely in Iran 
 | Electro         | 78.157.42.100  | 78.157.42.101  |
 | Begzar          | 185.55.226.26  | 185.55.226.25  |
 | DNS Pro         | 87.107.110.109 | 87.107.110.110 |
+| DynX            | 10.70.95.150   | 10.70.95.162   |
 | 403.            | 10.202.10.202  | 10.202.10.102  |
 | Google          | 8.8.8.8        | 8.8.4.4        |
 | Cloudflare      | 1.1.1.1        | 1.0.0.1        |

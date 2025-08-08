@@ -13,13 +13,14 @@ if [ "$EUID" -ne 0 ]; then
     exit 1
 fi
 
-providers=("Shecan" "Radar" "Electro" "Begzar" "DNS Pro" "403" "Google" "Cloudflare" "Reset to Default")
+providers=("Shecan" "Radar" "Electro" "Begzar" "DNS Pro" "DynX" "403" "Google" "Cloudflare" "Reset to Default")
 declare -A dns_servers=(
     ["Shecan"]="178.22.122.100 185.51.200.2"
     ["Radar"]="10.202.10.10 10.202.10.11"
     ["Electro"]="78.157.42.100 78.157.42.101"
     ["Begzar"]="185.55.226.26 185.55.226.25"
     ["DNS Pro"]="87.107.110.109 87.107.110.110"
+    ["DynX"]="10.70.95.150 10.70.95.162"
     ["403"]="10.202.10.202 10.202.10.102"
     ["Google"]="8.8.8.8 8.8.4.4"
     ["Cloudflare"]="1.1.1.1 1.0.0.1"
