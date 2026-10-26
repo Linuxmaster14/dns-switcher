@@ -27,10 +27,20 @@ declare -A dns_servers=(
     ["Reset to Default"]="127.0.0.53"
 )
 
+RESOLVED_DROPIN="/etc/systemd/resolved.conf.d/dns-switcher.conf"
+
+uses_resolved() {
+    systemctl is-active --quiet systemd-resolved
+}
+
 show_current() {
     echo
     echo -e "${YELLOW}Current DNS:${NC}"
-    grep "^nameserver" /etc/resolv.conf 2>/dev/null | awk '{print "  •", $2}' || echo "  (none)"
+    if uses_resolved; then
+        resolvectl dns | sed 's/^/  /'
+    else
+        grep "^nameserver" /etc/resolv.conf 2>/dev/null | awk '{print "  •", $2}' || echo "  (none)"
+    fi
     echo
 }
 
@@ -78,7 +88,34 @@ update_resolv() {
     } > "$tmp"
 
     chmod 644 "$tmp"
-    mv "$tmp" /etc/resolv.conf
+    # -Z gives the file the default SELinux label for /etc/resolv.conf instead of keeping the /tmp one
+    mv -Z "$tmp" /etc/resolv.conf
+    echo -e "${GREEN}DNS updated:${NC} $provider (${dns_list// /, })"
+}
+
+# With systemd-resolved, /etc/resolv.conf must stay a symlink to its stub;
+# the upstream servers are set through a resolved.conf drop-in instead.
+update_resolved() {
+    local provider="$1"
+    local dns_list="$2"
+
+    if [ "$provider" = "Reset to Default" ]; then
+        rm -f "$RESOLVED_DROPIN"
+    else
+        mkdir -p -Z "$(dirname "$RESOLVED_DROPIN")"
+        {
+            echo "# Updated on $(date)"
+            echo "# Provider: $provider"
+            echo "[Resolve]"
+            echo "DNS=$dns_list"
+            # Prefer these servers over per-link ones (e.g. from DHCP) for all domains
+            echo "Domains=~."
+        } > "$RESOLVED_DROPIN"
+    fi
+
+    # Undo a static /etc/resolv.conf left by older versions of this script
+    ln -sf ../run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
+    systemctl restart systemd-resolved
     echo -e "${GREEN}DNS updated:${NC} $provider (${dns_list// /, })"
 }
 
@@ -106,12 +143,12 @@ main() {
 
         provider="${providers[$((choice - 1))]}"
         backup_resolv
-        update_resolv "$provider" "${dns_servers[$provider]}"
-
-        if systemctl is-active --quiet systemd-resolved; then
-            systemctl restart systemd-resolved
+        if uses_resolved; then
+            update_resolved "$provider" "${dns_servers[$provider]}"
+        else
+            update_resolv "$provider" "${dns_servers[$provider]}"
         fi
-        
+
         show_current
         break
     done

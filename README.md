@@ -21,6 +21,7 @@ A simple Bash script to quickly switch your system DNS servers to popular provid
   * Cloudflare
 * Includes “Reset to Default” option (127.0.0.53)
 * Preserves custom `options` and `search` lines
+* On systems running `systemd-resolved` (Fedora, Ubuntu, …), sets DNS via `/etc/systemd/resolved.conf.d/dns-switcher.conf` and keeps `/etc/resolv.conf` linked to the resolved stub (SELinux-safe)
 
 ## Usage
 
